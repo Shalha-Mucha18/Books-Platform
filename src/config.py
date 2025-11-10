@@ -1,0 +1,15 @@
+from pathlib import Path
+
+from pydantic_settings import BaseSettings, SettingsConfigDict
+
+
+class Settings(BaseSettings):
+
+    DATABASE_URL: str
+
+    model_config = SettingsConfigDict(
+        # Load the env file located alongside this module
+        env_file=Path(__file__).resolve().parent / ".env",
+        extra="ignore")
+
+Config = Settings()
