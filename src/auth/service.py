@@ -7,7 +7,7 @@ from src.config import Config
 from fastapi import HTTPException, status
 from datetime import timedelta
 from fastapi.responses import JSONResponse
-
+from typing import List
 
 class UserService:
     async def get_user_by_email(self,email:str,session:AsyncSession) -> User | None:
@@ -30,6 +30,8 @@ class UserService:
            **user_data_dict,
         )  
         new_user.password_hash = hash_password(user_data_dict["password"])
+        new_user.role = "user"
+    
         session.add(new_user)
         await session.commit()  
 
@@ -53,7 +55,8 @@ class UserService:
             user_data = {
                 'email': user.email,
                 'user_uid': str(user.id),
-                'username': user.username
+                'username': user.username,
+                'role': user.role
             }
         )
         refresh_token = create_access_token(
@@ -77,6 +80,8 @@ class UserService:
                 }
             }
         )
+
+
 
 
 

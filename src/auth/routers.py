@@ -6,12 +6,15 @@ from sqlmodel.ext.asyncio.session import AsyncSession
 from .utils import create_access_token, decode_access_token
 from datetime import timedelta, datetime
 from fastapi.responses import JSONResponse
-from .dependencies import RefreshTokenBearer, AccessTokenBearer
+from .dependencies import RefreshTokenBearer, AccessTokenBearer,get_current_user,RoleChecker
 from src.db.redis import add_jti_to_blocklist
+
+
 
 auth_router = APIRouter()
 user_service = UserService()
-access_token_bearer = AccessTokenBearer()
+access_token_bearer = AccessTokenBearer() 
+role_checker = RoleChecker(['admin','user'])
 
 
 @auth_router.post("/signup",response_model=UserModel,status_code=status.HTTP_201_CREATED)
@@ -60,7 +63,15 @@ async def get_new_access_token(
     raise HTTPException(
         status_code=status.HTTP_403_FORBIDDEN,
         detail="Refresh token has expired, please login again."
+        
     )
+
+@auth_router.get("/me")
+async def get_current_user(current_user = Depends(get_current_user), _:bool = Depends(role_checker)):
+    return current_user
+
+
+
 
 @auth_router.post("/logout")
 async def logout_user(

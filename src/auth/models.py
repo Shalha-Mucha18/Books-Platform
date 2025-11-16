@@ -21,6 +21,9 @@ class User(SQLModel, table=True):
     first_name: str | None = Field(default=None, nullable=True)
     last_name: str | None = Field(default=None, nullable=True)
     password_hash: str = Field(exclude=True, nullable=False)
+    role: str = Field(
+        sa_column = Column(pg.VARCHAR, nullable=False, server_default='user')
+    )
     is_verified: bool = Field(default=False, nullable=False)
     created_at: datetime = Field(default_factory=datetime.utcnow, nullable=False)
     updated_at: datetime = Field(default_factory=datetime.utcnow, nullable=False)

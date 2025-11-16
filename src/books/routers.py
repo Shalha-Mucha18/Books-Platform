@@ -7,15 +7,16 @@ from .schemas import Book, BookCreate, BookUpdate
 from src.db.main import get_session
 from sqlalchemy.ext.asyncio import AsyncSession
 from .service import BookService
-from src.auth.dependencies import AccessTokenBearer
+from src.auth.dependencies import AccessTokenBearer,RoleChecker
 
 books_router = APIRouter()
 book_service = BookService()
 access_token_bearer = AccessTokenBearer()
+role_checker = RoleChecker(['admin','user'])
 
 
 
-@books_router.get("/", response_model=List[Book])
+@books_router.get("/", response_model=List[Book], dependencies=[Depends(role_checker)])
 async def get_all_books(
     session:AsyncSession = Depends(get_session),
     user_details = Depends(access_token_bearer) ) -> List[Book]:
@@ -33,7 +34,7 @@ user_details = Depends(access_token_bearer) ) -> Book:
     return new_book
 
 
-@books_router.get("/{book_id}", response_model=List[Book])
+@books_router.get("/{book_id}", response_model=List[Book], dependencies=[Depends(role_checker)])
 async def get_book(book_id: UUID, session:AsyncSession = Depends(get_session),user_details = Depends(access_token_bearer)  ) -> Book:
 
     print("User Details:", user_details)  # For debugging purposes
@@ -45,7 +46,7 @@ async def get_book(book_id: UUID, session:AsyncSession = Depends(get_session),us
         )
     return book
 
-@books_router.patch("/{book_id}", response_model=List[Book])
+@books_router.patch("/{book_id}", response_model=List[Book], dependencies=[Depends(role_checker)])
 async def update_book(book_id: UUID, book_update_data: BookUpdate, session:AsyncSession = Depends(get_session),user_details = Depends(access_token_bearer)  ) -> Book:
     updated_book = await book_service.update_book(book_id, book_update_data, session)
     if updated_book is None:
@@ -56,7 +57,7 @@ async def update_book(book_id: UUID, book_update_data: BookUpdate, session:Async
     return updated_book
 
 
-@books_router.delete("/{book_id}", status_code=status.HTTP_204_NO_CONTENT)
+@books_router.delete("/{book_id}", status_code=status.HTTP_204_NO_CONTENT, dependencies=[Depends(role_checker)])
 async def delete_book(book_id: UUID,session:AsyncSession = Depends(get_session),user_details = Depends(access_token_bearer) ) -> None:
     book_to_delete = await book_service.delete_book(session, book_id)
     if book_to_delete is not None:
