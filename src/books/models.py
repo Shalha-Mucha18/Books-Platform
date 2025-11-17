@@ -1,7 +1,8 @@
-from sqlmodel import SQLModel, Field, Column
+from sqlmodel import SQLModel, Field, Column, Relationship
 import sqlalchemy.dialects.postgresql as pg
 from datetime import datetime, date
 import uuid
+from src.auth.models import User
 from pydantic import BaseModel
 from typing import Optional
 
@@ -38,6 +39,7 @@ class Book(SQLModel, table=True):
             onupdate=datetime.utcnow
         )
     )
+    user: Optional['models.User'] = Relationship(back_populates='books')
 
     def __repr__(self):
         return (
