@@ -19,25 +19,29 @@ role_checker = RoleChecker(['admin','user'])
 @books_router.get("/", response_model=List[Book], dependencies=[Depends(role_checker)])
 async def get_all_books(
     session:AsyncSession = Depends(get_session),
-    user_details = Depends(access_token_bearer) ) -> List[Book]:
-
-
-    print("User Details:", user_details)  # For debugging purposes
+    token_details: dict = Depends(access_token_bearer) ) -> List[Book]:
+    
     all_book = await book_service.get_all_books(session)
     return all_book
 
 
 @books_router.post("/", response_model=Book, status_code=status.HTTP_201_CREATED)
 async def create_book(book_data: BookCreate, session: AsyncSession = Depends(get_session),
-user_details = Depends(access_token_bearer) ) -> Book:
-    new_book = await book_service.create_book(book_data, session)
+token_details: dict = Depends(access_token_bearer) ) -> Book:
+    
+    user_id = token_details.get('user')['user_uid']
+    new_book = await book_service.create_book(book_data, session,user_id)
     return new_book
 
+@books_router.get("/user/{user_id}", response_model=List[Book], status_code=status.HTTP_200_OK)
+async def get_user_books(user_id: str, session: AsyncSession = Depends(get_session), token_details: dict = Depends(access_token_bearer)) -> List[Book]:
+    books = await book_service.get_user_books(session, user_id)
+    return books
 
-@books_router.get("/{book_id}", response_model=List[Book], dependencies=[Depends(role_checker)])
-async def get_book(book_id: UUID, session:AsyncSession = Depends(get_session),user_details = Depends(access_token_bearer)  ) -> Book:
 
-    print("User Details:", user_details)  # For debugging purposes
+@books_router.get("/{book_id}", response_model=Book, dependencies=[Depends(role_checker)])
+async def get_book(book_id: UUID, session:AsyncSession = Depends(get_session),token_details: dict = Depends(access_token_bearer) ) -> Book:
+
     book = await book_service.get_book_by_uid(session, book_id)
     if book is None:
         raise HTTPException(
@@ -47,7 +51,7 @@ async def get_book(book_id: UUID, session:AsyncSession = Depends(get_session),us
     return book
 
 @books_router.patch("/{book_id}", response_model=List[Book], dependencies=[Depends(role_checker)])
-async def update_book(book_id: UUID, book_update_data: BookUpdate, session:AsyncSession = Depends(get_session),user_details = Depends(access_token_bearer)  ) -> Book:
+async def update_book(book_id: UUID, book_update_data: BookUpdate, session:AsyncSession = Depends(get_session),token_details: dict = Depends(access_token_bearer) ) -> Book:
     updated_book = await book_service.update_book(book_id, book_update_data, session)
     if updated_book is None:
         raise HTTPException(
@@ -58,7 +62,7 @@ async def update_book(book_id: UUID, book_update_data: BookUpdate, session:Async
 
 
 @books_router.delete("/{book_id}", status_code=status.HTTP_204_NO_CONTENT, dependencies=[Depends(role_checker)])
-async def delete_book(book_id: UUID,session:AsyncSession = Depends(get_session),user_details = Depends(access_token_bearer) ) -> None:
+async def delete_book(book_id: UUID,session:AsyncSession = Depends(get_session),token_details: dict = Depends(access_token_bearer)) -> None:
     book_to_delete = await book_service.delete_book(session, book_id)
     if book_to_delete is not None:
         await session.delete(book_to_delete)

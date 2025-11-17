@@ -13,15 +13,22 @@ class BookService:
         statement = select(Book).order_by(desc(Book.created_at))
         result = await session.execute(statement)
         return result.scalars().all()
-         
+
+    async def get_user_books(self, session: AsyncSession, user_id: str):
+        uid = UUID(user_id) if isinstance(user_id, str) else user_id
+        statement = select(Book).where(Book.user_uid == uid).order_by(desc(Book.created_at))
+        result = await session.execute(statement)
+        return result.scalars().all()
 
     async def get_book_by_uid(self, session: AsyncSession, book_uid: UUID):
         statement = select(Book).where(Book.id == book_uid)
         result = await session.execute(statement)
         return result.scalar_one_or_none()
 
-    async def create_book(self, book_data: BookCreate, session: AsyncSession):
+    async def create_book(self, book_data: BookCreate, session: AsyncSession, user_id: str):
         new_book = Book(**book_data.model_dump())
+        # Ensure the foreign key matches the UUID column type
+        new_book.user_uid = UUID(user_id) if isinstance(user_id, str) else user_id
         session.add(new_book)
         await session.commit()
         await session.refresh(new_book)

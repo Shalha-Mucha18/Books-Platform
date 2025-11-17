@@ -3,6 +3,7 @@ import sqlalchemy.dialects.postgresql as pg
 from datetime import datetime, date
 import uuid
 from pydantic import BaseModel
+from typing import Optional
 
 class Book(SQLModel, table=True):
     __tablename__ = "books"  # Explicit table name
@@ -22,7 +23,7 @@ class Book(SQLModel, table=True):
     published_date: date
     page_count: int
     language: str
-
+    user_uid: Optional[uuid.UUID] = Field(default=None, foreign_key="users.id")
     created_at: datetime = Field(
         sa_column=Column(
             pg.TIMESTAMP,

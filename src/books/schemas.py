@@ -14,6 +14,7 @@ class Book(BaseModel):
     published_date: date
     page_count: int
     language: str
+    user_uid: Optional[uuid.UUID] = None
     created_at: datetime
     updated_at: datetime
 
