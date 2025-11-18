@@ -5,7 +5,7 @@ from src.db.redis import token_in_blocklist
 from sqlmodel.ext.asyncio.session import AsyncSession
 from src.auth.service import UserService   
 from src.db.main import get_session
-from .models import User
+from src.db.models import User
 from typing import List
 
 user_service = UserService()

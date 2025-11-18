@@ -1,8 +1,10 @@
-from sqlmodel.ext.asyncio.session import AsyncSession
-from .models import Book
-from .schemas import BookCreate, BookUpdate
-from sqlmodel import select, desc
 from uuid import UUID
+
+from sqlmodel import desc, select
+from sqlmodel.ext.asyncio.session import AsyncSession
+
+from src.db.models import Book
+from .schemas import BookCreate, BookUpdate
 
 
 

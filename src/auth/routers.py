@@ -1,5 +1,5 @@
 from fastapi import APIRouter, Depends, HTTPException, status
-from  .schemas import UserCreateModel, UserModel, UserLoginModel
+from  .schemas import UserCreateModel, UserModel, UserLoginModel,UserBooks
 from .service import UserService
 from src.db.main import get_session
 from sqlmodel.ext.asyncio.session import AsyncSession
@@ -66,7 +66,7 @@ async def get_new_access_token(
         
     )
 
-@auth_router.get("/me", response_model=UserModel)
+@auth_router.get("/me", response_model=UserBooks)
 async def get_current_user(current_user = Depends(get_current_user), _:bool = Depends(role_checker)):
     return current_user
 
