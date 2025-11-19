@@ -29,6 +29,7 @@ class User(SQLModel, table=True):
     created_at: datetime = Field(default_factory=datetime.utcnow, nullable=False)
     updated_at: datetime = Field(default_factory=datetime.utcnow, nullable=False)
     reviews: List["Review"] = Relationship(back_populates="user")
+    books: List["Book"] = Relationship(back_populates="user")
 
 
     def __repr__(self):
@@ -68,7 +69,7 @@ class Book(SQLModel, table=True):
         )
     )
     user: Optional['User'] = Relationship(back_populates='books')
-    review: List['Review'] = Relationship(back_populates='books')
+    reviews: List['Review'] = Relationship(back_populates='book')
 
 
     def __repr__(self):
