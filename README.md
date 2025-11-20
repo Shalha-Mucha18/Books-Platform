@@ -29,6 +29,8 @@ An asynchronous FastAPI service for managing books with user authentication, JWT
 - Book CRUD with per-user ownership, timestamps, and review support.
 - Async data layer with SQLModel + PostgreSQL (`asyncpg`) and Alembic migrations.
 - Ready-to-run OpenAPI/Swagger UI for fast onboarding and demos.
+- Next.js 14 marketing site that consumes the Books API, with curated fallback data for demos.
+- Dedicated `/dashboard` operations view highlighting live catalog metrics, tables, and activity feeds.
 
 ## Project Structure (high level)
 - `src/__init__.py`: FastAPI app, lifespan, router registration.
@@ -37,8 +39,9 @@ An asynchronous FastAPI service for managing books with user authentication, JWT
 - `src/reviews/`: review routes/services/schemas.
 - `src/db/`: SQLModel models and session management.
 - `mirgrations/`: Alembic migration env.
+- `frontend/`: Next.js 14 App Router workspace (marketing + dashboard).
 
-## Setup
+## Backend Setup
 1. **Install dependencies**
    ```bash
    python -m venv .venv
@@ -62,6 +65,43 @@ An asynchronous FastAPI service for managing books with user authentication, JWT
    - Docs: `http://localhost:8000/docs`
    - Books: `/api/v1.0.0/books`
    - Auth: `/api/v1.0.0/auth`
+
+## Frontend (Next.js 14 + React 18)
+1. **Install Node modules**
+   ```bash
+   cd frontend
+   npm install
+   ```
+2. **Create `frontend/.env.local`**
+   ```ini
+   NEXT_PUBLIC_API_BASE_URL=http://localhost:8000/api/v1.0.0
+   # Optional – short-lived JWT access token for SSR previews
+   NEXT_PUBLIC_API_ACCESS_TOKEN=<your_access_token>
+   ```
+   The UI automatically falls back to curated demo data when the API/token is unavailable and surfaces an alert.
+3. **Run the Next.js dev server**
+   ```bash
+   npm run dev
+   ```
+   - Marketing site: `http://localhost:3000`
+   - Operations dashboard: `http://localhost:3000/dashboard`
+4. **Production build preview**
+   ```bash
+   npm run build
+   npm run start
+   ```
+
+### Run both services together
+```bash
+# Terminal 1 – FastAPI backend
+source .venv/bin/activate
+uvicorn src:app --reload
+
+# Terminal 2 – Next.js frontend
+cd frontend
+npm run dev
+```
+Keep `NEXT_PUBLIC_API_BASE_URL`/`NEXT_PUBLIC_API_ACCESS_TOKEN` in sync with the backend host and freshly issued JWT tokens to see live catalog data (otherwise the UI shows the demo collection).
 
 ## Logging
 - Enable structured app logs via Uvicorn:

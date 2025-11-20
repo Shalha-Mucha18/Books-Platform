@@ -2,10 +2,9 @@ from fastapi import FastAPI
 from fastapi.requests import Request
 import time
 import logging
-from fastapi.response import JSONResponse 
+from fastapi.responses import JSONResponse
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.middleware.trustedhost import TruestedHostMiddleware
-
+from starlette.middleware.trustedhost import TrustedHostMiddleware
 logger = logging.getLogger("uvicoren.access")
 logger.disabled = True
 
@@ -27,26 +26,30 @@ def register_middleware(app:FastAPI):
 
         return response
 
-    @app.middleware('hhtp')
+    @app.middleware('http')
     async def authorization(request:Request,call_next):
 
-        if not "Authorization" in request.headers:
+        if "Authorization" not in request.headers:
             return JSONResponse(
-
-                contest = {
+                content={
                     "message": "Not Authenticated",
                     "resolution": "Please provide the right credentials to proceed"
-                }
-            )   
-    app.add_middleware(
-        CORSMiddleware,
-        allow_origins = ["*"],
-        aloow_methods = ["*"],
-        allow_headers = ["*"],
-        allow_credentials = True
-    )   
+                },
+                status_code=401
+            )
+
+        return await call_next(request)
+
 
     app.add_middleware(
-        TruestedHostMiddleware,
-        allowed_hoasts = [""]
-    )     
+        CORSMiddleware,
+        allow_origins=["*"],
+        allow_methods=["*"],
+        allow_headers=["*"],
+        allow_credentials=True
+    )
+
+    app.add_middleware(
+        TrustedHostMiddleware,
+        allowed_hosts=["*"]   # or ["yourdomain.com"]
+    )   
