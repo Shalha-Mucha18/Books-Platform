@@ -13,6 +13,12 @@
 
 An asynchronous FastAPI service for managing books with user authentication, JWT-based access/refresh tokens, and role-protected endpoints. Built for reliability (typed SQLModel models, async DB sessions), security (hashed passwords, JWT with Redis blocklist), and operability (Alembic migrations, structured logging).
 
+## Overview
+- **Backend**: FastAPI with async SQLModel + PostgreSQL; Alembic migrations ensure schema parity across environments; Redis backs token blacklisting and cache-friendly lookups.
+- **Auth**: Email/password signup + login with hashed credentials; short-lived access tokens and longer refresh tokens; role claims (`user`, `admin`) are injected into dependency guards for RBAC.
+- **Data model**: Users own Books; Books can have Reviews; timestamps and ownership fields baked into models for auditing.
+- **Ops & DX**: Project wired for `.env` configuration, typed services, and consistent router patterns; ready-made logging commands for demos; Next.js frontend consumes the same versioned API paths used in docs.
+
 **Project impact**
 - Demonstrates a production-style FastAPI stack: layered architecture (routers/services/models), async DB access, and JWT/role-based auth.
 - Shows how to integrate Redis for token revocation and PostgreSQL for relational data with clean migrations.
